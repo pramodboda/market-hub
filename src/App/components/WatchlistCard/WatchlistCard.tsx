@@ -235,9 +235,9 @@ export default function WatchlistCard() {
               </Box>
 
               {/* Financial Figures */}
-              <Box sx={{ width: "15%", textAlign: "right" }}>
+              <Box sx={{ width: "15%", textAlign: "right", lineHeight: "0rem" }}>
 
-                {data ? (<><Typography variant="body2" sx={{ color: isPositive ? "#22c55e" : "black", fontWeight: "bold" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></>) : ""}
+                {data ? (<Box><Typography variant="body2" sx={{ color: isPositive ? "#22c55e" : "black", fontWeight: "bold" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></Box>) : ""}
               </Box>
 
 
