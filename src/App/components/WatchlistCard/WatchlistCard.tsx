@@ -17,6 +17,7 @@ import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import { lightGreen, green, red, grey } from '@mui/material/colors';
 
 import { mfapi } from "../../api/axios";
+import { truncateText } from "../../helpers/helpers";
 
 
 
@@ -216,20 +217,6 @@ export default function WatchlistCard() {
           const data = fundDataMap[scheme.code];
           const isPositive = data ? data.changePct > 0 : true;
           // const dataSchemeName = data.schemeName.length > 10? {data.schemeName}: 
-
-          function truncateText(text, maxLength) {
-            // 1. Clean up any accidental leading/trailing whitespace
-            const cleanedText = text.trim();
-
-            // 2. Check if the text is longer than the allowed maximum
-            if (cleanedText.length > maxLength) {
-              // Cut the text and add the ellipsis
-              return cleanedText.substring(0, maxLength) + '...';
-            }
-
-            // 3. Return the clean text as-is if it's within the limit
-            return cleanedText;
-          }
 
 
           return (<ListItem key={scheme.code}>
