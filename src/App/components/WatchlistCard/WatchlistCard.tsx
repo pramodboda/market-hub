@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from "react";
 
-import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -10,6 +11,8 @@ import Avatar from '@mui/material/Avatar';
 import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+
+import { green } from '@mui/material/colors';
 
 import { mfapi } from "../../api/axios";
 
@@ -63,7 +66,8 @@ export default function WatchlistCard() {
   const [fundDataMap, setFundDataMap] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const [dense, setDense] = useState(false);
+  // List states
+  const [dense, setDense] = useState(true);
 
   // Fetch mutual fund NAV details from API
   const fetchFundDetails = async (schemeCode) => {
@@ -150,13 +154,21 @@ export default function WatchlistCard() {
 
         return (<ListItem key={scheme.code}>
 
-          <Stack>
-            {/* Left: Fund Name & Info */}
-            <ListItemText primary={data ? data.schemeName : scheme.name}></ListItemText>
-            {/* Financial Figures */}
-            {data ? (<><div>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</div> <div>   ₹{data.latestNAV.toFixed(2)}</div></>) : ""}
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'space-between', width: "100%" }}>
 
-          </Stack>
+            {/* Left: Fund Name & Info */}
+            <Box>
+              <ListItemText primary={data ? data.schemeName : scheme.name}></ListItemText>
+            </Box>
+
+            {/* Financial Figures */}
+            <Box sx={{ textAlign: "right" }}>
+
+              {data ? (<><Typography variant="body2" sx={{ color: isPositive ? green[500] : "black" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></>) : ""}
+            </Box>
+
+
+          </Box >
 
 
         </ListItem>)
@@ -164,40 +176,17 @@ export default function WatchlistCard() {
 
       <ListItem>
 
-        <Stack sx={{
-          flexDirection: "row", alignItems: "center", justifyContent: "space-between"
+        <Box sx={{
+          display: "flex", alignItems: "center", justifyContent: 'space-between', width: "100%"
         }}>
           <ListItemText primary="dfkjghdlkfgh"></ListItemText>
           {/* Financial Figures */}
           +876%
-        </Stack>
+        </Box>
 
 
       </ListItem >
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <ImageIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Photos" secondary="Jan 9, 2014" />
-      </ListItem>
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <WorkIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Work" secondary="Jan 7, 2014" />
-      </ListItem>
-      <ListItem>
-        <ListItemAvatar>
-          <Avatar>
-            <BeachAccessIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText primary="Vacation" secondary="July 20, 2014" />
-      </ListItem>
+
     </List >
   </>
 
