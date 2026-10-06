@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -12,7 +14,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 
-import { green } from '@mui/material/colors';
+import { lightGreen, green, red } from '@mui/material/colors';
 
 import { mfapi } from "../../api/axios";
 
@@ -21,11 +23,10 @@ import { mfapi } from "../../api/axios";
 
 // Default scheme codes for top popular Indian Mutual Funds on mfapi.in
 const INITIAL_SCHEMES = [
-  { code: '120716', name: 'UTI Nifty 50 Index Fund Direct Growth', category: 'Index' },
-  { code: '122639', name: 'Parag Parikh Flexi Cap Fund Direct Growth', category: 'Flexi Cap' },
-  { code: '100033', name: 'Aditya Birla Sun Life Frontline Equity Fund Direct Growth', category: 'Large Cap' },
-  { code: '118989', name: 'Mirae Asset Large Cap Fund Direct Growth', category: 'Large Cap' },
-  { code: '125497', name: 'SBI Small Cap Fund Direct Growth', category: 'Small Cap' }
+  { code: '120716', name: 'UTI Nifty 50 Index Fund - Direct Plan - Growth', category: 'Index' },
+  { code: '122639', name: 'Parag Parikh Flexi Cap Fund - Direct Plan - Growth', category: 'Flexi Cap' },
+  { code: '119568', name: 'Aditya Birla Sun Life Liquid Fund - Direct Plan - GROWTH', category: 'Liquid' },
+  { code: '147622', name: 'Motilal Oswal Nifty Midcap 150 Index Fund - Direct Plan - Growth', category: 'Mid Cap' },
 ];
 
 // Fallback historical data in case of CORS or network error with mfapi.in
@@ -56,12 +57,70 @@ const FALLBACK_HISTORICAL_DATA = {
   ]
 };
 
+/**
+ * Renders a compact, smooth SVG sparkline with gradient fill
+ */
+const Sparkline = ({ data, isPositive, height = 36, width = 72 }) => {
+  if (!data || data.length < 2) return <div className="w-[72px] h-[36px]" />;
+
+  const navValues = data.map(d => parseFloat(d.nav)).filter(v => !isNaN(v));
+  if (navValues.length < 2) return null;
+
+  const min = Math.min(...navValues);
+  const max = Math.max(...navValues);
+  const range = max - min === 0 ? 1 : max - min;
+
+  // Normalize points to SVG coordinates
+  const points = navValues.map((val, idx) => {
+    const x = (idx / (navValues.length - 1)) * width;
+    // Map NAV high to y=2 and low to y=height-2 (inverted Y axis in SVG)
+    const y = height - 4 - ((val - min) / range) * (height - 8);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  const pathD = `M ${points.join(' L ')}`;
+  const areaD = `${pathD} L ${width},${height} L 0,${height} Z`;
+
+  const colorClass = isPositive ? lightGreen[500] : red[900]; // Emerald green vs Rose red
+  const gradientId = `sparkline-grad-${Math.random().toString(36).substring(2, 9)}`;
+
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={colorClass} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={colorClass} stopOpacity="0.0" />
+        </linearGradient>
+      </defs>
+      {/* Filled Area */}
+      <path d={areaD} fill={`url(#${gradientId})`} />
+      {/* Line path */}
+      <path
+        d={pathD}
+        fill="none"
+        stroke={colorClass}
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Latest value dot */}
+      {points.length > 0 && (
+        <circle
+          cx={points[points.length - 1].split(',')[0]}
+          cy={points[points.length - 1].split(',')[1]}
+          r="2.5"
+          fill={colorClass}
+        />
+      )}
+    </svg>
+  );
+};
 
 
 
 
 export default function WatchlistCard() {
-  const [selectedSchemes, setSelectedSchemes] = useState(INITIAL_SCHEMES.slice(0, 3));
+  const [selectedSchemes, setSelectedSchemes] = useState(INITIAL_SCHEMES.slice(0, 4));
   const [suggestedScheme, setSuggestedScheme] = useState(INITIAL_SCHEMES[3]);
   const [fundDataMap, setFundDataMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -146,48 +205,65 @@ export default function WatchlistCard() {
 
   return (<>
     {/* <button onClick={getFundDetails(125497)}>Click Me</button> */}
-    <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }} dense={dense}>
 
-      {selectedSchemes.map((scheme) => {
-        const data = fundDataMap[scheme.code];
-        const isPositive = data ? data.changePct > 0 : true;
+    <Card sx={{ maxWidth: 360, mb: 2 }}>
+      <CardContent><Typography variant="body1" sx={{ fontWeight: "bold" }}>Watchlist Widget</Typography></CardContent>
 
-        return (<ListItem key={scheme.code}>
+      <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', }} dense={dense}>
 
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'space-between', width: "100%" }}>
+        {selectedSchemes.map((scheme) => {
+          const data = fundDataMap[scheme.code];
+          const isPositive = data ? data.changePct > 0 : true;
 
-            {/* Left: Fund Name & Info */}
-            <Box>
-              <ListItemText primary={data ? data.schemeName : scheme.name}></ListItemText>
-            </Box>
+          return (<ListItem key={scheme.code}>
 
-            {/* Financial Figures */}
-            <Box sx={{ textAlign: "right" }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'space-between', width: "100%", }}>
 
-              {data ? (<><Typography variant="body2" sx={{ color: isPositive ? green[500] : "black" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></>) : ""}
-            </Box>
+              {/* Left: Fund Name & Info */}
+              <Box sx={{ width: "60%" }}>
+                <ListItemText primary={data ? data.schemeName : scheme.name}></ListItemText>
+              </Box>
 
+              {/* Right: Sparkline + NAV & % Change */}
+              <Box sx={{ width: "25%" }}>
+                {data ? (
+                  <Sparkline data={data.history} isPositive={isPositive} height={30} width={60} />
+                ) : (
+                  <div className="w-[60px] h-[30px] bg-zinc-800/50 rounded animate-pulse" />
+                )}
+              </Box>
 
-          </Box >
+              {/* Financial Figures */}
+              <Box sx={{ width: "15%", textAlign: "right" }}>
 
-
-        </ListItem>)
-      })}
-
-      <ListItem>
-
-        <Box sx={{
-          display: "flex", alignItems: "center", justifyContent: 'space-between', width: "100%"
-        }}>
-          <ListItemText primary="dfkjghdlkfgh"></ListItemText>
-          {/* Financial Figures */}
-          +876%
-        </Box>
+                {data ? (<><Typography variant="body2" sx={{ color: isPositive ? lightGreen[600] : "black", fontWeight: "bold" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></>) : ""}
+              </Box>
 
 
-      </ListItem >
+            </Box >
 
-    </List >
+
+          </ListItem>)
+        })}
+      </List >
+
+    </Card>
+
+    {/* Explanatory Banner below Widget */}
+
+
+    <Card sx={{ maxWidth: 360 }}>
+      {/* <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" /> */}
+      <CardContent>
+        <Typography variant="body2">How percent change is calculated:</Typography>
+        <code>
+          Change % = ((Latest NAV - Previous NAV) / Previous NAV) * 100
+        </code>
+        <Typography variant="body2">
+          Calculated automatically from the latest 2 historical NAV data points returned by mfapi.in.
+        </Typography>
+      </CardContent>
+    </Card>
   </>
 
   );
