@@ -7,7 +7,7 @@ const api = axios.create({
         "Content-Type": "application/json",
     }
 });
-const mfapi = axios.create({
+export const mfapi = axios.create({
     baseURL: import.meta.env.VITE_MF_API_BASE_URL,
     timeout: 10000,
     headers: {
