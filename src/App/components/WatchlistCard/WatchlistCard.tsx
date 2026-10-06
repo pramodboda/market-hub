@@ -81,7 +81,7 @@ const Sparkline = ({ data, isPositive, height = 36, width = 72 }) => {
   const pathD = `M ${points.join(' L ')}`;
   const areaD = `${pathD} L ${width},${height} L 0,${height} Z`;
 
-  const colorClass = isPositive ? lightGreen[500] : red[900]; // Emerald green vs Rose red
+  const colorClass = isPositive ? "#22c55e" : red[900]; // Emerald green vs Rose red
   const gradientId = `sparkline-grad-${Math.random().toString(36).substring(2, 9)}`;
 
   return (
@@ -207,7 +207,8 @@ export default function WatchlistCard() {
     {/* <button onClick={getFundDetails(125497)}>Click Me</button> */}
 
     <Card sx={{ maxWidth: 360, mb: 2 }}>
-      <CardContent><Typography variant="body1" sx={{ fontWeight: "bold" }}>Watchlist Widget</Typography></CardContent>
+      <CardContent><Typography variant="body1" sx={{ fontWeight: "bold" }}>Watchlist Widget</Typography>
+        <Typography variant="caption"> Real-time data powered by mfapi.in REST API</Typography></CardContent>
 
       <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', }} dense={dense}>
 
@@ -236,7 +237,7 @@ export default function WatchlistCard() {
               {/* Financial Figures */}
               <Box sx={{ width: "15%", textAlign: "right" }}>
 
-                {data ? (<><Typography variant="body2" sx={{ color: isPositive ? lightGreen[600] : "black", fontWeight: "bold" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></>) : ""}
+                {data ? (<><Typography variant="body2" sx={{ color: isPositive ? "#22c55e" : "black", fontWeight: "bold" }}>{isPositive ? "+" : ''}{data.changePct.toFixed(2)}%</Typography> <Typography variant="caption">₹{data.latestNAV.toFixed(2)}</Typography></>) : ""}
               </Box>
 
 
@@ -246,12 +247,10 @@ export default function WatchlistCard() {
           </ListItem>)
         })}
       </List >
-
     </Card>
 
+
     {/* Explanatory Banner below Widget */}
-
-
     <Card sx={{ maxWidth: 360 }}>
       {/* <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" /> */}
       <CardContent>
